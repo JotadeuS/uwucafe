@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UwU Café Menu 🐾</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================
+           CONFIGURACIÓN BASE Y MODO CLARO (ORIGINAL)
+           ========================================= */
+        :root {
+            --pink-light: #ffe4e1;
+            --pink-medium: #ffb6c1;
+            --pink-strong: #ff69b4;
+            --pink-dark: #c71585;
+            --white: #ffffff;
+            --green-light: #55efc4;
+            --green-dark: #00b894;
+            --btn-logout-bg: #f1f2f6;
+            --btn-logout-text: #747d8c;
+            --btn-logout-border: #ced6e0;
+        }
+
+        * {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" style="font-size: 36px;"><text y="35">🐾</text></svg>'), auto;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            color: #333;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--pink-light);
+            background-image: 
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><text y="50" font-size="50" opacity="0.1">🐱</text></svg>'),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="80" height="80"><text y="50" font-size="40" opacity="0.1">🐾</text></svg>'),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="70" height="70"><text y="50" font-size="30" opacity="0.1">👂</text></svg>');
+            background-repeat: repeat;
+            background-position: 0 0, 50px 50px, 20px 80px;
+            background-size: 100px 100px, 80px 80px, 70px 70px;
+            z-index: -1;
+            transition: background-color 0.3s ease, filter 0.3s ease;
+        }
+
+        /* ----- SISTEMA DE LOGIN Y MESEROS ----- */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        #login-overlay::before {
+            content: "";
+            position: absolute;
+            top: -5%; left: -5%; width: 110%; height: 110%;
+            background-image: url('fondouwu.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: blur(12px);
+            z-index: -2;
+        }
+
+        #login-overlay::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 182, 193, 0.35);
+            z-index: -1;
+            transition: background 0.3s ease;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            border: 4px solid var(--pink-strong);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
+        }
+
+        .login-box input {
+            font-size: 1.2rem;
+            padding: 10px;
+            width: 80%;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 2px solid var(--pink-medium);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .mesero-info {
+            background: white;
+            padding: 12px 25px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--pink-dark);
+            border: 3px dashed var(--pink-medium);
+            width: 100%;
+            max-width: 1100px;
+            text-align: center;
+            box-sizing: border-box;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        /* ----- ESTILOS ORIGINALES REVISADOS ----- */
+        h1 { 
+            text-align: center; 
+            font-size: 3rem; 
+            text-shadow: 2px 2px var(--pink-medium); 
+            margin-top: 0;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 40px;
+            border-radius: 50px;
+            color: var(--pink-strong);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1100px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .menu-section {
+            flex: 2;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 25px;
+            border: 3px solid var(--pink-medium);
+            backdrop-filter: blur(2px);
+            transition: all 0.3s ease;
+        }
+
+        .category-title {
+            background: var(--pink-strong);
+            color: white;
+            padding: 12px 0;
+            border-radius: 15px;
+            margin-top: 25px;
+            font-size: 1.6rem;
+            display: block;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 0px var(--pink-dark);
+            transition: all 0.3s ease;
+        }
+
+        .product-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--white);
+            margin: 12px 0;
+            padding: 15px;
+            border-radius: 15px;
+            border-left: 5px solid var(--pink-medium);
+            transition: all 0.3s ease;
+        }
+
+        .product-name {
+            color: var(--pink-strong);
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        input[type="number"] {
+            width: 45px;
+            padding: 6px;
+            border-radius: 10px;
+            border: 2px solid var(--pink-medium);
+            text-align: center;
+            font-weight: bold;
+            color: var(--pink-dark);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .btn-paw {
+            background: var(--pink-medium);
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 0px var(--pink-strong);
+            transition: all 0.2s ease;
+        }
+
+        .btn-paw:hover { transform: translateY(-2px); background: var(--pink-strong); }
+        .btn-paw:active { transform: translateY(2px); box-shadow: 0 2px 0px var(--pink-strong); }
+        .btn-paw::after { content: '🐾'; font-size: 1.2rem; color: black; }
+
+        .cart-section {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 20px;
+            border-radius: 25px;
+            border: 4px solid var(--pink-strong);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            min-width: 300px;
+            transition: all 0.3s ease;
+        }
+
+        .cart-title {
+            margin-top: 0;
+            text-align: center;
+            color: var(--pink-strong);
+            transition: color 0.3s ease;
+        }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 10px;
+            align-items: center;
+            border-bottom: 1px solid var(--pink-light);
+            padding: 10px 0;
+            color: var(--pink-dark);
+            transition: border-color 0.3s ease, color 0.3s ease;
+        }
+
+        .cart-qty-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .cart-qty-controls input[type="number"] {
+            width: 55px;
+            font-size: 1rem;
+        }
+
+        .btn-qty {
+            background: var(--pink-light);
+            color: var(--pink-dark);
+            border: 2px solid var(--pink-medium);
+            border-radius: 8px;
+            width: 30px;
+            height: 30px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: all 0.2s ease;
+        }
+
+        .btn-qty:hover {
+            background: var(--pink-medium);
+            color: white;
+        }
+
+        .summary-table {
+            margin-top: 20px;
+            border-top: 2px dashed var(--pink-medium);
+            padding-top: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        .summary-row { display: flex; justify-content: space-between; margin: 5px 0; font-weight: bold; color: var(--pink-dark); transition: color 0.3s ease; }
+
+        .total-final {
+            font-size: 1.5rem;
+            color: var(--pink-strong);
+            border-top: 3px solid var(--pink-strong);
+            padding-top: 10px;
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 10px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-clear { background: var(--pink-medium); color: white; box-shadow: 0 4px 0px var(--pink-strong); }
+        .btn-clear:hover { background: var(--pink-strong); transform: translateY(-2px); }
+        .btn-clear:active { transform: translateY(2px); box-shadow: 0 2px 0px var(--pink-strong); }
+        
+        .btn-save { background: var(--green-light); color: var(--green-dark); border: 2px solid var(--green-dark); box-shadow: 0 4px 0px var(--green-dark); }
+        .btn-save:hover { background: var(--green-dark); color: white; transform: translateY(-2px); }
+        .btn-save:active { transform: translateY(2px); box-shadow: 0 2px 0px var(--green-dark); }
+
+        .btn-logout { background: var(--btn-logout-bg); color: var(--btn-logout-text); border: 2px solid var(--btn-logout-border); font-size: 0.9rem; }
+        .btn-logout:hover { background: var(--btn-logout-border); color: #2f3542; }
+
+        .btn-delete { 
+            background: #ff7675; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            padding: 5px 10px; 
+            transition: background 0.2s ease; 
+        }
+        .btn-delete:hover {
+            background: #d63031; 
+        }
+
+        .cart-buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .cart-buttons-row {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .cart-buttons-row .btn-main {
+            margin-top: 0;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--white);
+            border: 2px solid var(--pink-medium);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle:hover { transform: scale(1.1); }
+
+
+        /* =========================================
+           NUEVO: POP-UPS PERSONALIZADOS (MODALES)
+           ========================================= */
+        #custom-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 182, 193, 0.6);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        #custom-modal-overlay.active {
+            opacity: 1; pointer-events: auto;
+        }
+
+        .custom-modal-box {
+            background: white;
+            padding: 30px;
+            border-radius: 25px;
+            text-align: center;
+            border: 4px solid var(--pink-strong);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            max-width: 400px; width: 90%;
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s ease, border-color 0.3s ease;
+        }
+
+        #custom-modal-overlay.active .custom-modal-box {
+            transform: scale(1);
+        }
+
+        .modal-cat {
+            font-size: 4rem;
+            display: inline-block;
+            animation: bounceCat 1.5s ease-in-out infinite;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+        }
+
+        @keyframes bounceCat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .custom-modal-box p {
+            font-size: 1.2rem;
+            color: var(--pink-dark);
+            font-weight: bold;
+            margin-bottom: 25px;
+            line-height: 1.4;
+            transition: color 0.3s ease;
+        }
+
+        .modal-buttons {
+            display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;
+        }
+
+        .modal-buttons .btn-main {
+            margin-top: 0;
+            width: auto;
+            padding: 10px 25px;
+        }
+
+        .hidden-btn { display: none !important; }
+
+        /* =========================================
+           MODO OSCURO REESTRUCTURADO
+           ========================================= */
+        
+        body.dark-mode {
+            --pink-light: #15101a;
+            --pink-medium: #9a41c1;
+            --pink-strong: #ff42a1;
+            --pink-dark: #ffe1f0;
+            --white: #1f1a26;
+            --green-light: #8be9fd;
+            --green-dark: #00e6d9;
+            --btn-logout-bg: #3d354a;
+            --btn-logout-text: #b6adb9;
+            --btn-logout-border: #554a66;
+            color: var(--pink-dark);
+        }
+
+        body.dark-mode::before {
+            background-color: var(--pink-light);
+            filter: grayscale(30%) brightness(40%);
+        }
+
+        body.dark-mode #login-overlay::after {
+            background: rgba(10, 5, 15, 0.75); 
+        }
+
+        body.dark-mode .login-box,
+        body.dark-mode .mesero-info,
+        body.dark-mode .cart-section,
+        body.dark-mode .menu-section,
+        body.dark-mode h1 {
+            background: rgba(31, 26, 38, 0.95);
+            border-color: var(--pink-medium);
+            color: var(--pink-dark);
+        }
+
+        body.dark-mode h1 {
+            text-shadow: 2px 2px 0px #6d1a93;
+            color: var(--pink-strong);
+        }
+
+        body.dark-mode h2,
+        body.dark-mode .product-name {
+            color: var(--pink-strong);
+        }
+
+        body.dark-mode .product-card {
+            background: #2a2233;
+            border-left-color: var(--pink-medium);
+        }
+
+        body.dark-mode input[type="text"],
+        body.dark-mode input[type="number"] {
+            background: #15101a;
+            border-color: #3d354a;
+            color: var(--pink-dark);
+        }
+
+        body.dark-mode .category-title {
+            box-shadow: 0 4px 0px #b0005d;
+        }
+
+        body.dark-mode .btn-paw {
+            background: var(--pink-medium);
+            box-shadow: 0 4px 0px #6d1a93;
+        }
+        body.dark-mode .btn-paw:hover {
+            background: var(--pink-strong);
+            box-shadow: 0 4px 0px #b0005d;
+        }
+        body.dark-mode .btn-paw:active {
+            box-shadow: 0 2px 0px #6d1a93;
+        }
+
+        body.dark-mode .btn-qty {
+            background: #3d354a;
+            border-color: var(--pink-medium);
+            color: var(--pink-dark);
+        }
+        body.dark-mode .btn-qty:hover {
+            background: var(--pink-medium);
+            color: white;
+        }
+
+        body.dark-mode .btn-save {
+            box-shadow: 0 4px 0px var(--green-dark);
+        }
+        body.dark-mode .btn-save:active {
+            box-shadow: 0 2px 0px var(--green-dark);
+        }
+
+        body.dark-mode .btn-clear {
+            box-shadow: 0 4px 0px #6d1a93;
+        }
+        body.dark-mode .btn-clear:active {
+            box-shadow: 0 2px 0px #6d1a93;
+        }
+
+        body.dark-mode #discount-check + label b {
+            color: var(--green-light) !important;
+        }
+        body.dark-mode .cart-section div[style*="background: var(--pink-light)"] {
+            background: #2a2233 !important;
+            border: 1px solid var(--pink-medium);
+        }
+
+        body.dark-mode .cart-item {
+            border-bottom-color: #3d354a;
+        }
+        body.dark-mode .summary-table {
+            border-top-color: var(--pink-medium);
+        }
+        body.dark-mode .summary-row,
+        body.dark-mode label {
+            color: var(--pink-dark) !important;
+        }
+
+        body.dark-mode .cart-title,
+        body.dark-mode .total-final span {
+            color: var(--pink-strong);
+        }
+
+        body.dark-mode #login-logo {
+            filter: invert(58%) sepia(74%) saturate(2336%) hue-rotate(294deg) brightness(103%) contrast(102%);
+        }
+
+        /* Pop-ups en Modo Oscuro */
+        body.dark-mode #custom-modal-overlay {
+            background: rgba(10, 5, 15, 0.85);
+        }
+        body.dark-mode .custom-modal-box {
+            background: rgba(31, 26, 38, 0.98);
+            border-color: var(--pink-medium);
+        }
+
+    </style>
+</head>
+<body>
+
+    <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema UwU">🌙</button>
+
+    <div id="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="modal-cat">🐱</div>
+            <p id="modal-message">Mensaje aquí</p>
+            <div class="modal-buttons">
+                <button id="modal-btn-ok" class="btn-main btn-save hidden-btn">¡Entendido! ✨</button>
+                <button id="modal-btn-yes" class="btn-main btn-save hidden-btn">Sí, por favor 🐾</button>
+                <button id="modal-btn-no" class="btn-main btn-clear hidden-btn">Mejor no 😿</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            
+            <h2 style="color: var(--pink-strong); font-size: 2.2rem; margin-top: 0; margin-bottom: -10px; letter-spacing: 2px; text-shadow: 1px 1px var(--pink-medium);">BIENVENIDO/A</h2>
+            
+            <img id="login-logo" src="uwu.png" alt="UwU Cafe Logo" style="width: 220px; margin-bottom: -10px; position: relative; transition: filter 0.3s ease;">
+            
+            <p style="color: var(--pink-dark); font-weight: bold; margin-top: 0; margin-bottom: 5px; position: relative;">Ingresa tu nombre para comenzar tu turno:</p>
+            
+            <input type="text" id="mesero-name" placeholder="Nombre del Mesero" style="margin-top: 10px;" onkeypress="handleLoginKeyPress(event)"><br>
+            <button class="btn-main" style="background: var(--pink-strong); color: white;" onclick="iniciarSesion()">Empezar a Atender ✨</button>
+        </div>
+    </div>
+
+    <div id="info-bar" class="mesero-info" style="display:none;">
+        👤 Mesero: <span id="display-mesero" style="color: var(--pink-strong);"></span> &nbsp;|&nbsp; 
+        💰 Total Vendido Hoy: $<span id="ventas-acumuladas" style="color: #00b894;">0</span>
+    </div>
+
+    <h1>🐾 UwU Café 🐾</h1>
+
+    <div class="container">
+        <div class="menu-section" id="menu-items"></div>
+
+        <div class="cart-section">
+            <h2 class="cart-title">Pedido de Michis 🐱</h2>
+            <div id="cart-content"></div>
+            
+            <div style="background: var(--pink-light); padding: 10px; border-radius: 15px; margin: 15px 0; text-align: center; transition: background 0.3s ease;">
+                <input type="checkbox" id="discount-check" onchange="updateCartUI()" style="transform: scale(1.3); cursor: pointer;"> 
+                <label for="discount-check" style="cursor: pointer;"><b style="color: var(--pink-dark);"> ✨ Descuento 40% ✨</b></label>
+            </div>
+
+            <div class="summary-table">
+                <div class="summary-row"><span>Subtotal:</span><span>$<span id="subtotal-val">0</span></span></div>
+                <div class="summary-row" style="color: #d63031;"><span>Ahorro:</span><span>-$<span id="discount-val">0</span></span></div>
+                <div class="summary-row total-final"><span>TOTAL:</span><span>$<span id="total-val">0</span></span></div>
+            </div>
+
+            <div class="cart-buttons-container">
+                <div class="cart-buttons-row">
+                    <button class="btn-main btn-save" onclick="guardarPedido()">✅ Guardar</button>
+                    <button class="btn-main btn-clear" onclick="clearCart()">🗑️ Limpiar</button>
+                </div>
+                <button class="btn-main btn-logout" onclick="cerrarSesion()">👋 Cerrar Turno</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================
+        // FUNCIONES DEL MODAL PERSONALIZADO
+        // =========================================
+        function showModal(message, type = 'alert') {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('custom-modal-overlay');
+                const msgEl = document.getElementById('modal-message');
+                let btnOk = document.getElementById('modal-btn-ok');
+                let btnYes = document.getElementById('modal-btn-yes');
+                let btnNo = document.getElementById('modal-btn-no');
+
+                msgEl.innerText = message;
+                overlay.classList.add('active');
+
+                // Ocultamos todos los botones por defecto
+                btnOk.classList.add('hidden-btn');
+                btnYes.classList.add('hidden-btn');
+                btnNo.classList.add('hidden-btn');
+
+                // Clonamos los botones para eliminar listeners anteriores
+                const newBtnOk = btnOk.cloneNode(true); btnOk.parentNode.replaceChild(newBtnOk, btnOk);
+                const newBtnYes = btnYes.cloneNode(true); btnYes.parentNode.replaceChild(newBtnYes, btnYes);
+                const newBtnNo = btnNo.cloneNode(true); btnNo.parentNode.replaceChild(newBtnNo, btnNo);
+
+                function closeModal() {
+                    overlay.classList.remove('active');
+                }
+
+                if (type === 'alert') {
+                    newBtnOk.classList.remove('hidden-btn');
+                    newBtnOk.onclick = () => { closeModal(); resolve(true); };
+                } else if (type === 'confirm') {
+                    newBtnYes.classList.remove('hidden-btn');
+                    newBtnNo.classList.remove('hidden-btn');
+                    newBtnYes.onclick = () => { closeModal(); resolve(true); };
+                    newBtnNo.onclick = () => { closeModal(); resolve(false); };
+                }
+            });
+        }
+
+
+        // =========================================
+        // LÓGICA DE TEMAS (CLARO/OSCURO)
+        // =========================================
+        (function initTheme() {
+            const savedTheme = localStorage.getItem('uwu_theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                updateThemeButtonIcon('dark');
+            }
+        })();
+
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+            
+            const currentTheme = body.classList.contains('dark-mode') ? 'dark' : 'light';
+            localStorage.setItem('uwu_theme', currentTheme);
+            updateThemeButtonIcon(currentTheme);
+        }
+
+        function updateThemeButtonIcon(theme) {
+            const btn = document.querySelector('.theme-toggle');
+            if (theme === 'dark') {
+                btn.innerText = '☀️'; 
+                btn.title = 'Cambiar a Modo Claro ☀️';
+            } else {
+                btn.innerText = '🌙'; 
+                btn.title = 'Cambiar a Modo Oscuro 🌙';
+            }
+        }
+
+        // =========================================
+        // LÓGICA ORIGINAL ADAPTADA A LOS MODALES
+        // =========================================
+
+        const products = [
+            { id: 1, cat: "Platos", name: "Bento Cute", price: 250000 },
+            { id: 2, cat: "Platos", name: "Gyozas", price: 250000 },
+            { id: 3, cat: "Platos", name: "Sushi Sweet", price: 230000 },
+            { id: 4, cat: "Platos", name: "Onigiri", price: 220000 },
+            { id: 5, cat: "Platos", name: "Ramen", price: 220000 },
+            { id: 6, cat: "Bebestibles", name: "Matcha uwu", price: 250000 },
+            { id: 7, cat: "Bebestibles", name: "Sakura Té", price: 230000 },
+            { id: 8, cat: "Bebestibles", name: "Ice Latte Pink", price: 220000 },
+            { id: 9, cat: "Bebestibles", name: "Hot Choco-Meow", price: 220000 },
+            { id: 10, cat: "Bebestibles", name: "Agua de UwU", price: 150000 },
+            { id: 11, cat: "Postres y Especiales", name: "Franui", price: 280000 },
+            { id: 12, cat: "Postres y Especiales", name: "Cheesecake", price: 250000 },
+            { id: 13, cat: "Postres y Especiales", name: "Manju Pink", price: 230000 },
+            { id: 14, cat: "Postres y Especiales", name: "Mochis", price: 220000 },
+            { id: 15, cat: "Postres y Especiales", name: "Chocolate Dubai Rosa", price: 3000000 },
+            { id: 16, cat: "Promociones", name: "Michi Promo (20 Ramen + 20 Latte)", price: 6000000 },
+            { id: 17, cat: "Promociones", name: "Michi Promo 2 (20 Mochis + 20 Choco)", price: 6000000 }
+        ];
+
+        let cart = [];
+        let meseroActual = "";
+        let totalAcumulado = 0;
+
+        function handleLoginKeyPress(event) {
+            if (event.key === 'Enter') {
+                iniciarSesion();
+            }
+        }
+
+        function iniciarSesion() {
+            const nombre = document.getElementById('mesero-name').value;
+            if (nombre.trim() === "") {
+                showModal("Por favor, ingresa tu nombre para empezar 🐾", "alert");
+                return;
+            }
+            
+            meseroActual = nombre.trim();
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('info-bar').style.display = 'block';
+            document.getElementById('display-mesero').innerText = meseroActual;
+            
+            const ventasGuardadas = localStorage.getItem(`ventas_uwu_${meseroActual}`);
+            totalAcumulado = ventasGuardadas ? parseInt(ventasGuardadas) : 0;
+            actualizarVentasDisplay();
+            
+            renderMenu();
+        }
+
+       async function cerrarSesion() {
+            if(totalAcumulado === 0) {
+                const quiereCerrar = await showModal("¿Seguro que quieres cerrar tu turno? No tienes ventas registradas hoy.", "confirm");
+                if(quiereCerrar) {
+                    location.reload();
+                }
+                return;
+            }
+
+            const confirmacion = await showModal(`¿Seguro que quieres cerrar el turno de ${meseroActual}? Se enviará tu reporte de ventas por $${totalAcumulado.toLocaleString('de-DE')}.`, "confirm");
+            
+            if(confirmacion) {
+                const ahora = new Date();
+                const fecha = ahora.toLocaleDateString('es-CL');
+                const hora = ahora.toLocaleTimeString('es-CL', {hour: '2-digit', minute:'2-digit'});
+                
+                const datosVenta = {
+                    mesero: meseroActual,
+                    total: totalAcumulado,
+                    fecha: fecha,
+                    hora: hora
+                };
+
+                const btnLogout = document.querySelector('.btn-logout');
+                btnLogout.innerText = "⏳ Guardando reporte...";
+                btnLogout.disabled = true;
+
+                try {
+                    const scriptURL = 'https://script.google.com/macros/s/AKfycbylsj54xCklTNCsNOjilG39kMwDTKJCsokhcxjV5NQHGrCVEYBymYp0qQjkLqOLcXM5xA/exec'; 
+                    
+                    await fetch(scriptURL, {
+                        method: 'POST',
+                        body: JSON.stringify(datosVenta),
+                        headers: {
+                            'Content-Type': 'text/plain;charset=utf-8',
+                        }
+                    });
+
+                    localStorage.setItem(`ventas_uwu_${meseroActual}`, 0);
+                    
+                    await showModal("¡Turno cerrado y reporte guardado con éxito! 🐾✨", "alert");
+                    location.reload();
+
+                } catch (error) {
+                    await showModal("Hubo un error al enviar el reporte. Por favor avisa al administrador.", "alert");
+                    btnLogout.innerText = "👋 Cerrar Turno";
+                    btnLogout.disabled = false;
+                }
+            }
+        }
+
+        function actualizarVentasDisplay() {
+            const display = document.getElementById('ventas-acumuladas');
+            display.innerText = totalAcumulado.toLocaleString('de-DE');
+            if(document.body.classList.contains('dark-mode')) {
+                display.style.color = "var(--green-light)";
+            } else {
+                display.style.color = "#00b894";
+            }
+        }
+
+        function guardarPedido() {
+            if (cart.length === 0) {
+                showModal("¡El carrito está vacío! 😿", "alert");
+                return;
+            }
+            
+            const totalActual = parseInt(document.getElementById('total-val').innerText.replace(/\./g, ''));
+            totalAcumulado += totalActual;
+            
+            localStorage.setItem(`ventas_uwu_${meseroActual}`, totalAcumulado);
+            
+            actualizarVentasDisplay();
+            showModal(`¡Pedido guardado exitosamente para ${meseroActual}! ✨`, "alert");
+            clearCart();
+        }
+
+        function renderMenu() {
+            const menuDiv = document.getElementById('menu-items');
+            const categories = [...new Set(products.map(p => p.cat))];
+            
+            menuDiv.innerHTML = categories.map(cat => `
+                <div class="category-title">🐾 ${cat.toUpperCase()} 🐾</div>
+                ${products.filter(p => p.cat === cat).map(p => `
+                    <div class="product-card">
+                        <div>
+                            <span class="product-name">${p.name}</span><br>
+                            <span style="color:var(--pink-dark); font-weight:bold; transition: color 0.3s ease;">$${p.price.toLocaleString('de-DE')}</span>
+                        </div>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <input type="number" id="qty-${p.id}" value="1" min="1">
+                            <button class="btn-paw" onclick="addToCart(${p.id})"></button>
+                        </div>
+                    </div>
+                `).join('')}
+            `).join('');
+        }
+
+        function addToCart(productId) {
+            const qtyInput = document.getElementById(`qty-${productId}`);
+            const quantity = parseInt(qtyInput.value);
+            const product = products.find(p => p.id === productId);
+            const existing = cart.find(item => item.id === productId);
+            
+            if (existing) { 
+                existing.quantity += quantity; 
+            } else { 
+                cart.push({ ...product, quantity }); 
+            }
+            
+            updateCartUI();
+            qtyInput.value = 1; 
+        }
+
+        function updateQuantity(index, newQty) {
+            if(newQty < 1) return;
+            cart[index].quantity = parseInt(newQty);
+            updateCartUI();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function clearCart() {
+            cart = [];
+            document.getElementById('discount-check').checked = false;
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const cartContent = document.getElementById('cart-content');
+            const subtotalVal = document.getElementById('subtotal-val');
+            const discountVal = document.getElementById('discount-val');
+            const totalVal = document.getElementById('total-val');
+            const hasDiscount = document.getElementById('discount-check').checked;
+
+            if (cart.length === 0) {
+                cartContent.innerHTML = '<p style="text-align: center; padding: 20px; color: #888; font-weight: bold;">Tu carrito está vacío 😿</p>';
+                subtotalVal.innerText = "0"; discountVal.innerText = "0"; totalVal.innerText = "0";
+                return;
+            }
+
+            let subtotal = 0;
+            cartContent.innerHTML = cart.map((item, index) => {
+                subtotal += item.price * item.quantity;
+                return `
+                    <div class="cart-item">
+                        <span><b>${item.name}</b></span>
+                        <div class="cart-qty-controls">
+                            <button class="btn-qty" onclick="updateQuantity(${index}, ${item.quantity - 1})">-</button>
+                            <input type="number" value="${item.quantity}" min="1" onchange="updateQuantity(${index}, this.value)">
+                            <button class="btn-qty" onclick="updateQuantity(${index}, ${item.quantity + 1})">+</button>
+                        </div>
+                        <button class="btn-delete" onclick="removeFromCart(${index})">🗑️</button>
+                    </div>
+                `;
+            }).join('');
+
+            let discount = hasDiscount ? subtotal * 0.4 : 0;
+            let finalTotal = subtotal - discount;
+
+            subtotalVal.innerText = subtotal.toLocaleString('de-DE');
+            discountVal.innerText = discount.toLocaleString('de-DE');
+            totalVal.innerText = finalTotal.toLocaleString('de-DE');
+        }
+
+        updateCartUI();
+    </script>
+</body>
+</html>
