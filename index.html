@@ -808,13 +808,17 @@
         function handleLoginKeyPress(event) { if (event.key === 'Enter') { iniciarSesion(); } }
 
         function iniciarSesion() {
-            const nombre = document.getElementById('mesero-name').value;
-            if (nombre.trim() === "") {
+            const nombreIngresado = document.getElementById('mesero-name').value.trim();
+            if (nombreIngresado === "") {
                 showModal("Por favor, ingresa tu nombre para empezar 🐾", "alert");
                 return;
             }
             
-            meseroActual = nombre.trim();
+            // ESTANDARIZAR NOMBRE: Convierte ej. "jUaN pErEz" en "Juan Perez"
+            meseroActual = nombreIngresado.toLowerCase().split(' ').map(palabra => 
+                palabra.charAt(0).toUpperCase() + palabra.slice(1)
+            ).join(' ');
+
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('info-bar').style.display = 'block';
             document.getElementById('display-mesero').innerText = meseroActual;
@@ -840,47 +844,21 @@
                 return;
             }
 
-            const confirmacion = await showModal(`¿Seguro que quieres cerrar el turno de ${meseroActual}? Se enviará tu reporte de ventas por $${totalAcumulado.toLocaleString('de-DE')}.`, "confirm");
+            const confirmacion = await showModal(`¿Seguro que quieres cerrar el turno de ${meseroActual}? El total de $${totalAcumulado.toLocaleString('de-DE')} quedará registrado en el panel.`, "confirm");
             
             if(confirmacion) {
-                const ahora = new Date();
-                const fecha = ahora.toLocaleDateString('es-CL');
-                const hora = ahora.toLocaleTimeString('es-CL', {hour: '2-digit', minute:'2-digit'});
-                
-                const datosVenta = {
-                    mesero: meseroActual,
-                    total: totalAcumulado,
-                    fecha: fecha,
-                    hora: hora
-                };
-
                 const btnLogout = document.querySelector('.btn-logout');
-                btnLogout.innerText = "⏳ Guardando reporte...";
+                btnLogout.innerText = "⏳ Guardando...";
                 btnLogout.disabled = true;
 
-                try {
-                    const scriptURL = 'https://script.google.com/macros/s/AKfycbylsj54xCklTNCsNOjilG39kMwDTKJCsokhcxjV5NQHGrCVEYBymYp0qQjkLqOLcXM5xA/exec'; 
-                    
-                    await fetch(scriptURL, {
-                        method: 'POST',
-                        body: JSON.stringify(datosVenta),
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                    });
+                let history = JSON.parse(localStorage.getItem('admin_history_uwu')) || {};
+                history[meseroActual] = (history[meseroActual] || 0) + totalAcumulado;
+                localStorage.setItem('admin_history_uwu', JSON.stringify(history));
 
-                    let history = JSON.parse(localStorage.getItem('admin_history_uwu')) || {};
-                    history[meseroActual] = (history[meseroActual] || 0) + totalAcumulado;
-                    localStorage.setItem('admin_history_uwu', JSON.stringify(history));
-
-                    localStorage.removeItem(`ventas_uwu_${meseroActual}`);
-                    
-                    await showModal("¡Turno cerrado y reporte guardado con éxito! 🐾✨", "alert");
-                    location.reload();
-
-                } catch (error) {
-                    await showModal("Hubo un error al enviar el reporte. Por favor avisa al administrador.", "error");
-                    btnLogout.innerText = "👋 Cerrar Turno";
-                    btnLogout.disabled = false;
-                }
+                localStorage.removeItem(`ventas_uwu_${meseroActual}`);
+                
+                await showModal("¡Turno cerrado y reporte guardado con éxito en el panel! 🐾✨", "alert");
+                location.reload();
             }
         }
 
