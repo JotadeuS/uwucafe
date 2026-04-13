@@ -84,7 +84,6 @@
             transition: all 0.3s ease; position: relative; z-index: 10;
         }
 
-        /* Envoltorio para iconos internos en inputs */
         .input-icon-wrapper {
             position: relative; width: 80%; margin: 25px auto;
         }
@@ -112,8 +111,6 @@
             width: 100%; max-width: 1100px; text-align: center;
             box-sizing: border-box; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             transition: all 0.3s ease;
-            
-            /* --- Modificación para dejar la barra estática al hacer scroll --- */
             position: sticky;
             top: 20px;
             z-index: 900;
@@ -360,14 +357,13 @@
         .modal-buttons .btn-main { margin-top: 0; width: auto; padding: 10px 25px; }
         .hidden-btn { display: none !important; }
 
-        /* ESTILO PARA MODAL DE ERROR */
         .custom-modal-box.error-state { border-color: #ff4757 !important; }
         .custom-modal-box.error-state p { color: #ff4757 !important; }
         .btn-error { background: #ff4757 !important; color: white !important; border: none !important; box-shadow: 0 4px 0px #c0392b !important; }
         .btn-error:hover { background: #ff6b81 !important; }
 
         /* =========================================
-           MODO OSCURO REESTRUCTURADO ("MIDNIGHT SAKURA")
+           MODO OSCURO REESTRUCTURADO
            ========================================= */
         body.dark-mode {
             --pink-light: #1e1b26;      
@@ -443,7 +439,6 @@
         body.dark-mode #custom-modal-overlay { background: rgba(18, 15, 24, 0.85); }
         body.dark-mode .custom-modal-box { background: rgba(44, 39, 56, 0.98); border-color: var(--pink-medium); }
         
-        /* Dark mode Top 1 Gold */
         body.dark-mode .top1-gold {
             background: linear-gradient(145deg, #403500, #221c00) !important;
             border: 2px solid #ffda33 !important;
@@ -559,95 +554,37 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+
     <script>
+        // =========================================
+        // CONFIGURACIÓN DE FIREBASE (¡REEMPLAZA ESTO!)
+        // =========================================
+         const firebaseConfig = {
+    apiKey: "AIzaSyBN_aHKsnQDojztrvicn6Yz-yXWCatMFRQ",
+    authDomain: "menu-uwu-cafe.firebaseapp.com",
+    databaseURL: "https://menu-uwu-cafe-default-rtdb.firebaseio.com/",
+    projectId: "menu-uwu-cafe",
+    storageBucket: "menu-uwu-cafe.firebasestorage.app",
+    messagingSenderId: "2026221718",
+    appId: "1:2026221718:web:4efb99afba1cef2a16d2b7",
+    measurementId: "G-F8TDLYL52W"
+  };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         // =========================================
         // CONFIGURACIÓN DE ADMINISTRADOR
         // =========================================
         const CLAVE_ADMIN = "adminuwu";
 
-        async function pedirClaveAdmin() {
-            const claveIngresada = await showModal("Por favor, ingresa la clave maestra 👑:", "input");
-            if (claveIngresada !== false) {
-                if (claveIngresada === CLAVE_ADMIN) {
-                    abrirAdmin();
-                } else {
-                    showModal("Contraseña errónea 😾 Acceso denegado.", "error");
-                }
-            }
-        }
-
-        function abrirAdmin() {
-            const overlay = document.getElementById('admin-overlay');
-            overlay.style.display = 'flex';
-            setTimeout(() => overlay.classList.add('active'), 10);
-            cargarDatosPanelAdmin();
-        }
-
-        function cerrarAdmin() {
-            const overlay = document.getElementById('admin-overlay');
-            overlay.classList.remove('active');
-            setTimeout(() => overlay.style.display = 'none', 300);
-        }
-
-        async function limpiarRegistrosManual() {
-            let history = JSON.parse(localStorage.getItem('admin_history_uwu')) || {};
-            let hasHistory = Object.keys(history).length > 0;
+        // Escuchador en tiempo real para el panel Admin
+        function cargarDatosPanelAdmin(snapshot) {
+            const consolidados = snapshot ? snapshot.val() || {} : {};
             
-            let hasActive = false;
-            for (let i = 0; i < localStorage.length; i++) {
-                if (localStorage.key(i) && localStorage.key(i).startsWith('ventas_uwu_')) {
-                    hasActive = true;
-                    break;
-                }
-            }
-
-            if (!hasHistory && !hasActive) {
-                showModal("No hay registros en el sistema para borrar 😿", "alert");
-                return;
-            }
-
-            const confirmar = await showModal("¿Estás seguro de borrar TODOS los registros del panel? Esto reiniciará la nómina a 0.", "confirm");
-            if (confirmar) {
-                localStorage.removeItem('admin_history_uwu');
-
-                let keysToRemove = [];
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key && key.startsWith('ventas_uwu_')) {
-                        keysToRemove.push(key);
-                    }
-                }
-                keysToRemove.forEach(key => localStorage.removeItem(key));
-                
-                if (meseroActual) {
-                    localStorage.setItem(`ventas_uwu_${meseroActual}`, 0);
-                    totalAcumulado = 0;
-                    actualizarVentasDisplay();
-                }
-                
-                cargarDatosPanelAdmin();
-                showModal("¡Registros limpiados con éxito! ✨", "alert");
-            }
-        }
-
-        function cargarDatosPanelAdmin() {
-            let history = JSON.parse(localStorage.getItem('admin_history_uwu')) || {};
-            let consolidados = { ...history };
-
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.startsWith('ventas_uwu_')) {
-                    const nombre = key.replace('ventas_uwu_', '');
-                    const activoVendido = parseInt(localStorage.getItem(key)) || 0;
-                    
-                    if (consolidados[nombre]) {
-                        consolidados[nombre] += activoVendido;
-                    } else {
-                        consolidados[nombre] = activoVendido;
-                    }
-                }
-            }
-
             let todosLosMeseros = Object.keys(consolidados).map(nombre => ({
                 nombre: nombre,
                 totalVendido: consolidados[nombre]
@@ -655,6 +592,7 @@
 
             todosLosMeseros.sort((a, b) => b.totalVendido - a.totalVendido);
 
+            // Renderizar Top 3
             const top3Div = document.getElementById('top3-content');
             if (todosLosMeseros.length === 0) {
                 top3Div.innerHTML = '<p class="admin-empty-text">No hay registros de ventas todavía 🐾</p>';
@@ -664,7 +602,6 @@
                 for (let i = 0; i < 3; i++) {
                     if (todosLosMeseros[i]) {
                         let claseExtra = (i === 0) ? 'top1-gold' : '';
-                        
                         htmlTop3 += `
                             <div class="admin-top3-item ${claseExtra}">
                                 <span>${medallas[i]} ${todosLosMeseros[i].nombre}</span>
@@ -676,6 +613,7 @@
                 top3Div.innerHTML = htmlTop3;
             }
 
+            // Renderizar Tabla de Nómina
             const tbody = document.getElementById('admin-tbody');
             if (todosLosMeseros.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="3" style="color: #888; padding: 15px;">Sin registros de pago</td></tr>';
@@ -692,6 +630,48 @@
                     `;
                 });
                 tbody.innerHTML = htmlTabla;
+            }
+        }
+
+        // Activamos la escucha en tiempo real
+        database.ref('ventas_uwu').on('value', (snapshot) => {
+            cargarDatosPanelAdmin(snapshot);
+        });
+
+        async function pedirClaveAdmin() {
+            const claveIngresada = await showModal("Por favor, ingresa la clave maestra 👑:", "input");
+            if (claveIngresada !== false) {
+                if (claveIngresada === CLAVE_ADMIN) {
+                    abrirAdmin();
+                } else {
+                    showModal("Contraseña errónea 😾 Acceso denegado.", "error");
+                }
+            }
+        }
+
+        function abrirAdmin() {
+            const overlay = document.getElementById('admin-overlay');
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 10);
+        }
+
+        function cerrarAdmin() {
+            const overlay = document.getElementById('admin-overlay');
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.style.display = 'none', 300);
+        }
+
+        async function limpiarRegistrosManual() {
+            const confirmar = await showModal("¿Estás seguro de borrar TODOS los registros de la base de datos? Esto reiniciará la nómina a 0.", "confirm");
+            if (confirmar) {
+                // Borramos todo el nodo de ventas en la nube
+                database.ref('ventas_uwu').remove();
+                
+                if (meseroActual) {
+                    totalAcumulado = 0;
+                    actualizarVentasDisplay();
+                }
+                showModal("¡Registros limpiados con éxito en la nube! ✨", "alert");
             }
         }
 
@@ -828,41 +808,32 @@
             document.getElementById('info-bar').style.display = 'block';
             document.getElementById('display-mesero').innerText = meseroActual;
             
-            if (localStorage.getItem(`ventas_uwu_${meseroActual}`) === null) {
-                localStorage.setItem(`ventas_uwu_${meseroActual}`, 0);
-            }
-
-            const ventasGuardadas = localStorage.getItem(`ventas_uwu_${meseroActual}`);
-            totalAcumulado = ventasGuardadas ? parseInt(ventasGuardadas) : 0;
-            actualizarVentasDisplay();
+            // Buscar el historial guardado en Firebase para este mesero al iniciar
+            database.ref('ventas_uwu/' + meseroActual).once('value').then((snapshot) => {
+                totalAcumulado = snapshot.val() || 0;
+                actualizarVentasDisplay();
+            });
             
             renderMenu();
         }
 
-       async function cerrarSesion() {
+        async function cerrarSesion() {
             if(totalAcumulado === 0) {
                 const quiereCerrar = await showModal("¿Seguro que quieres cerrar tu turno? No tienes ventas registradas.", "confirm");
                 if(quiereCerrar) {
-                    localStorage.removeItem(`ventas_uwu_${meseroActual}`);
                     location.reload();
                 }
                 return;
             }
 
-            const confirmacion = await showModal(`¿Seguro que quieres cerrar el turno de ${meseroActual}? El total de $${totalAcumulado.toLocaleString('de-DE')} quedará registrado en el panel.`, "confirm");
+            const confirmacion = await showModal(`¿Seguro que quieres cerrar el turno de ${meseroActual}? El total de $${totalAcumulado.toLocaleString('de-DE')} ya está registrado en el panel.`, "confirm");
             
             if(confirmacion) {
                 const btnLogout = document.querySelector('.btn-logout');
-                btnLogout.innerText = "⏳ Guardando...";
+                btnLogout.innerText = "⏳ Cerrando...";
                 btnLogout.disabled = true;
 
-                let history = JSON.parse(localStorage.getItem('admin_history_uwu')) || {};
-                history[meseroActual] = (history[meseroActual] || 0) + totalAcumulado;
-                localStorage.setItem('admin_history_uwu', JSON.stringify(history));
-
-                localStorage.removeItem(`ventas_uwu_${meseroActual}`);
-                
-                await showModal("¡Turno cerrado y reporte guardado con éxito en el panel! 🐾✨", "alert");
+                await showModal("¡Turno cerrado con éxito! 🐾✨", "alert");
                 location.reload();
             }
         }
@@ -885,7 +856,9 @@
             const totalActual = parseInt(document.getElementById('total-val').innerText.replace(/\./g, ''));
             
             totalAcumulado += totalActual;
-            localStorage.setItem(`ventas_uwu_${meseroActual}`, totalAcumulado);
+            
+            // Enviar la venta actualizada a la nube de Firebase
+            database.ref('ventas_uwu/' + meseroActual).set(totalAcumulado);
             
             actualizarVentasDisplay();
             showModal(`¡Pedido guardado exitosamente para ${meseroActual}! ✨`, "alert");
